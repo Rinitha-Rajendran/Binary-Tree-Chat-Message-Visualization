@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Chat Message Visualization</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color:aqua;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            overflow: hidden;
+            position: relative; /* Added for relative positioning */
+        }
+
+        h1 {
+            text-align: center;
+            color: #065d73;
+            margin-bottom: 20px;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f7f7f7;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            font-size: 16px;
+            overflow-y: auto;
+            max-height: 400px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            position: relative;
+            padding: 15px;
+            background-color: #1d435e;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeIn 0.5s ease; /* Added animation for message containers */
+        }
+
+        .message-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 4px solid #000601;
+        }
+
+        .message-content {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+            border-radius: 10px;
+            padding: 12px 18px;
+            max-width: 65%;
+            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            position: absolute;
+            bottom: -18px;
+            right: 10px;
+            background-color: #e3f2fd;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+
+        .edit-button,
+        .delete-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            font-size: 14px;
+            position: absolute;
+            top: 10px;
+            transition: opacity 0.3s;
+        }
+
+        .edit-button {
+            color: #ff9800;
+            right: 70px;
+        }
+
+        .delete-button {
+            color: #f44336;
+            right: 10px;
+        }
+
+        .edit-button:hover,
+        .delete-button:hover {
+            opacity: 0.7;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: azure;
+            transform: scale(1.05);
+        }
+
+        .input-container {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-container select,
+        .input-container button {
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+            background-color: #fff;
+            color: #333;
+        }
+
+
+        .input-container button:hover {
+            background-color: aqua;
+        }
+
+        .input-container select {
+            flex: 1;
+        }
+
+        .input-container input {
+            flex: 2;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+            
+        }        
+        
+        .typing-indicator {
+            font-style: italic;
+            color: black ;
+            margin-top: 10px;
+        }
+
+        /* Binary Tree Visual Representation */
+        .tree-container {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .tree {
+            position: relative;
+        }
+
+        .node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: scaleUp 0.3s ease; /* Added animation for nodes */
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .arrow-container {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            top: 75px; /* Adjust to position the arrows properly */
+            width: 100%;
+            z-index: -1;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+        }
+
+        .left-arrow {
+            border-bottom: 5px solid #ccc;
+            margin-bottom: 15px;
+        }
+
+        .right-arrow {
+            border-top: 5px solid #ccc;
+            margin-top: 15px;
+        }
+
+        /* Keyframe animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(0.8);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Binary Tree Chat Message Visualization</h1>
+
+        <div class="message-box" id="message-box"></div>
+
+        <div class="input-container">
+            <select id="sender">
+                <option value="Rinitha">Rinitha</option>
+                <option value="Rathish">Rathish</option>
+                <option value="Rajendran">Rajendran</option>
+                <option value="Rekha">Rekha</option>
+                <option value="Gopal">Gopal</option>
+            </select>
+            <input type="text" id="message" placeholder="Enter message">
+            <button onclick="addChatMessage()">Send Message</button>
+        </div>
+
+        <div id="typing-indicator" class="typing-indicator"></div>
+    </div>
+
+    <!-- Binary Tree Visual Representation -->
+    <div class="tree-container">
+        <svg class="tree" id="binary-tree" viewBox="0 0 800 400"></svg>
+    </div>
+
+    <script>
+        const avatarPaths = {
+            "Rinitha": "https://via.placeholder.com/40?text=Rinitha",
+            "Rathish": "https://via.placeholder.com/40?text=Rathish",
+            "Rajendran": "https://via.placeholder.com/40?text=Rajendran",
+            "Rekha": "https://via.placeholder.com/40?text=Rekha",
+            "Gopal": "https://via.placeholder.com/40?text=Gopal"
+        };
+
+        class Node {
+            constructor(key, value) {
+                this.key = key;
+                this.value = value;
+                this.left = null;
+                this.right = null;
+            }
+        }
+
+        class BinaryTree {
+            constructor() {
+                this.root = null;
+                this.nodePositions = {};
+            }
+
+            insert(key, value) {
+                const newNode = new Node(key, value);
+                if (this.root === null) {
+                    this.root = newNode;
+                } else {
+                    this._insertNode(this.root, newNode);
+                }
+                this.positionNodes();
+                this.drawTree();
+            }
+
+            _insertNode(node, newNode) {
+                if (newNode.key < node.key) {
+                    if (node.left === null) {
+                        node.left = newNode;
+                    } else {
+                        this._insertNode(node.left, newNode);
+                    }
+                } else {
+                    if (node.right === null) {
+                        node.right = newNode;
+                    } else {
+                        this._insertNode(node.right, newNode);
+                    }
+                }
+            }
+
+            find(key) {
+                return this._findNode(this.root, key);
+            }
+
+            _findNode(node, key) {
+                if (node === null) {
+                    return null;
+                } else if (key < node.key) {
+                    return this._findNode(node.left, key);
+                } else if (key > node.key) {
+                    return this._findNode(node.right, key);
+                } else {
+                    return node;
+                }
+            }
+
+            delete(key) {
+                this.root = this._deleteNode(this.root, key);
+                this.positionNodes();
+                this.drawTree();
+            }
+
+            _deleteNode(node, key) {
+                if (node === null) {
+                    return node;
+                }
+                if (key < node.key) {
+                    node.left = this._deleteNode(node.left, key);
+                    return node;
+                } else if (key > node.key) {
+                    node.right = this._deleteNode(node.right, key);
+                    return node;
+                } else {
+                    if (node.left === null && node.right === null) {
+                        node = null;
+                        return node;
+                    }
+                    if (node.left === null) {
+                        node = node.right;
+                        return node;
+                    } else if (node.right === null) {
+                        node = node.left;
+                        return node;
+                    }
+                    const aux = this._findMinNode(node.right);
+                    node.key = aux.key;
+                    node.value = aux.value;
+                    node.right = this._deleteNode(node.right, aux.key);
+                    return node;
+                }
+            }
+
+            _findMinNode(node) {
+                if (node.left === null) {
+                    return node;
+                } else {
+                    return this._findMinNode(node.left);
+                }
+            }
+
+            traverse(callback) {
+                this._inOrderTraverseNode(this.root, callback);
+            }
+
+            _inOrderTraverseNode(node, callback) {
+                if (node !== null) {
+                    this._inOrderTraverseNode(node.left, callback);
+                    callback(node);
+                    this._inOrderTraverseNode(node.right, callback);
+                }
+            }
+
+            positionNodes() {
+                this.nodePositions = {};
+                this._calculateNodePositions(this.root, 400, 50, 300);
+            }
+
+            _calculateNodePositions(node, x, y, xOffset) {
+                if (node !== null) {
+                    this.nodePositions[node.key] = { x, y };
+                    this._calculateNodePositions(node.left, x - xOffset, y + 60, xOffset / 2);
+                    this._calculateNodePositions(node.right, x + xOffset, y + 60, xOffset / 2);
+                }
+            }
+
+            drawTree() {
+                const treeContainer = document.getElementById('binary-tree');
+                treeContainer.innerHTML = ''; // Clear previous tree
+                this._drawTreeRecursive(this.root, treeContainer, 400, 50, 300);
+            }
+
+            _drawTreeRecursive(node, treeContainer, x, y, xOffset) {
+                if (node !== null) {
+                    // Draw node
+                    const newNodeElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    newNodeElement.classList.add('node');
+                    newNodeElement.setAttribute('cx', x);
+                    newNodeElement.setAttribute('cy', y);
+                    newNodeElement.setAttribute('r', 30);
+                    newNodeElement.setAttribute('data-key', node.key);
+                    treeContainer.appendChild(newNodeElement);
+
+                    // Draw text inside node
+                    const textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    textElement.setAttribute('x', x);
+                    textElement.setAttribute('y', y + 10);
+                    textElement.setAttribute('text-anchor', 'middle');
+                    textElement.setAttribute('font-size', '18px');
+                    textElement.setAttribute('fill', '#fff');
+                    textElement.textContent = node.key;
+                    treeContainer.appendChild(textElement);
+
+                    // Draw arrows
+                    if (node.left !== null) {
+                        this._drawArrow(treeContainer, x, y, this.nodePositions[node.left.key].x, this.nodePositions[node.left.key].y);
+                        this._drawTreeRecursive(node.left, treeContainer, this.nodePositions[node.left.key].x, this.nodePositions[node.left.key].y, xOffset / 2);
+                    }
+                    if (node.right !== null) {
+                        this._drawArrow(treeContainer, x, y, this.nodePositions[node.right.key].x, this.nodePositions[node.right.key].y);
+                        this._drawTreeRecursive(node.right, treeContainer, this.nodePositions[node.right.key].x, this.nodePositions[node.right.key].y, xOffset / 2);
+                    }
+                }
+            }
+
+            _drawArrow(treeContainer, startX, startY, endX, endY) {
+                const angle = Math.atan2(endY - startY, endX - startX);
+                const arrowLength = 10;
+                const arrowWidth = 6;
+
+                const arrowX1 = endX - arrowLength * Math.cos(angle) - arrowWidth * Math.sin(angle);
+                const arrowY1 = endY - arrowLength * Math.sin(angle) + arrowWidth * Math.cos(angle);
+
+                const arrowX2 = endX - arrowLength * Math.cos(angle) + arrowWidth * Math.sin(angle);
+                const arrowY2 = endY - arrowLength * Math.sin(angle) - arrowWidth * Math.cos(angle);
+
+                const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                arrow.setAttribute('points', `${endX},${endY} ${arrowX1},${arrowY1} ${arrowX2},${arrowY2}`);
+                arrow.setAttribute('fill', '#ccc');
+                treeContainer.appendChild(arrow);
+            }
+        }
+
+        const tree = new BinaryTree();
+        let editingKey = null;
+
+        function addChatMessage() {
+            const sender = document.getElementById('sender').value;
+            const message = document.getElementById('message').value;
+            const timestamp = new Date().toLocaleTimeString();
+            if (sender && message) {
+                const msg = { sender, message, timestamp };
+                if (editingKey) {
+                    tree.delete(editingKey);
+                    editingKey = null;
+                }
+                tree.insert(sender, msg);
+                displayMessages();
+                document.getElementById('message').value = '';
+                clearTypingIndicator();
+            } else {
+                alert('Please enter both sender name and message.');
+            }
+        }
+
+        function displayMessages() {
+            let output = "";
+            tree.traverse(node => {
+                output += `<div class="message-container">
+                                <img class="avatar" src="${avatarPaths[node.value.sender]}" alt="Avatar">
+                                <div class="message-content">
+                                    <span style="font-weight: bold;">${node.value.sender}:</span> ${node.value.message}
+                                    <span class="timestamp">${node.value.timestamp}</span>
+                                </div>
+                                <button class="edit-button" onclick="editMessage('${node.value.sender}')">Edit</button>
+                                <button class="delete-button" onclick="deleteMessage('${node.value.sender}')">Delete</button>
+                            </div>`;
+            });
+            document.getElementById("message-box").innerHTML = output;
+        }
+
+        function clearTypingIndicator() {
+            document.getElementById('typing-indicator').innerText = '';
+        }
+
+        function editMessage(sender) {
+            const node = tree.find(sender);
+            if (node) {
+                document.getElementById('message').value = node.value.message;
+                document.getElementById('sender').value = node.value.sender;
+                editingKey = sender;
+            }
+        }
+
+        function deleteMessage(sender) {
+            tree.delete(sender);
+            displayMessages();
+        }
+
+        displayMessages();
+    </script>
+</body>
+</html>
